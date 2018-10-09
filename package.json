@@ -1,0 +1,20 @@
+{
+  "name": "simple-blockchain",
+  "version": "1.0.0",
+  "description": "A very simple blockchain implementation",
+  "main": "simpleChain.js",
+  "scripts": {
+    "test": "./node_modules/tape/bin/tape test/simpleChain.test.js  | ./node_modules/tap-spec/bin/cmd.js",
+    "doc": "jsdoc -c conf.json simpleChain.js"
+  },
+  "author": "Jeff Mastry",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-js": "^3.1.9-1",
+    "level": "^4.0.0"
+  },
+  "devDependencies": {
+    "tap-spec": "^5.0.0",
+    "tape": "^4.9.1"
+  }
+}
