@@ -122,6 +122,7 @@ class Blockchain {
         currentHeight = 0;
         const genesisBlock = createGenesisBlock();
         await db.put(currentHeight, Block.toJSON(genesisBlock));
+        await db.put("height", 0);
       }
 
       newBlock.height = currentHeight + 1;
@@ -132,6 +133,7 @@ class Blockchain {
 
       // Save the new block to the data store
       await db.put(newBlock.height, Block.toJSON(newBlock));
+      await db.put("height", newBlock.height);
     }
     catch (error) {
       console.error("Blockchain.addBlock failed.", error)
@@ -143,26 +145,18 @@ class Blockchain {
    * Get current block height in the chain.
    */
   async getBlockHeight() {
-    
-    let i = -1;
-    // an ugly hack to get the current block heigth,
-    // but I couldn't get createReadStream to work (for some reason)
-    while(true) {
-        try {
-            let _ = await db.get(i+1);
-            ++i;
-        }
-        catch (err) {
-          if( err.type == 'NotFoundError') {
-              break; // no more entries in the database
-          }
-          else {
-              throw err;
-          }
+    try {
+      let height = await db.get("height");
+      return parseInt(height, 10);
+    }
+    catch (err) {
+      if (err.notFound) {
+        return -1;
+      }
+      else {
+        throw err;
       }
     }
-
-    return i;
   }
 
 
@@ -222,34 +216,34 @@ class Blockchain {
     let previousBlock = null;
 
     db.createValueStream()
-    
-    .on('error', err => {
-      console.log('Unable to read key stream!', err)
-    })
 
-    .on('close', () => {
-      if (errorLog.length != 0) {
-        console.error("The chain is invalid:");
-        for (let e of errorLog) {
-          console.error(e);
+      .on('error', err => {
+        console.log('Unable to read key stream!', err)
+      })
+
+      .on('close', () => {
+        if (errorLog.length != 0) {
+          console.error("The chain is invalid:");
+          for (let e of errorLog) {
+            console.error(e);
+          }
         }
-      }
-    })
+      })
 
-    .on('data', currentBlock => {
-      // Validate the individual block
-      const block = Block.fromJSON(currentBlock);
-      if (!this.validateBlock(block)) {
-        errorLog.add(`Block ${block.height} is invalid`);
-      }
-
-      // Ensure this block has the correct hash for the previous block
-      if (previousBlock) {
-        if (block.previousBlockHash != previousBlock.hash) {
-          errorLog.add(`Block ${block.height} - invalid previousBlockHash.`);
+      .on('data', currentBlock => {
+        // Validate the individual block
+        const block = Block.fromJSON(currentBlock);
+        if (!this.validateBlock(block)) {
+          errorLog.add(`Block ${block.height} is invalid`);
         }
-      }
-    });
+
+        // Ensure this block has the correct hash for the previous block
+        if (previousBlock) {
+          if (block.previousBlockHash != previousBlock.hash) {
+            errorLog.add(`Block ${block.height} - invalid previousBlockHash.`);
+          }
+        }
+      });
 
     return errorLog.size === 0;
   }
@@ -258,6 +252,6 @@ class Blockchain {
 module.exports = {
   Block: Block,
   Blockchain: Blockchain,
-  init: async function () { db = await level('./db')},
-  close : async function() {await db.close()}
+  init: async function () { db = await level('./db') },
+  close: async function () { await db.close() }
 }
