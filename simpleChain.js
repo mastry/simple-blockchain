@@ -273,11 +273,11 @@ class Blockchain {
         })
         .on('close', () => {
           if( errorLog.size == 0 ) {
-            resolve(new ValidataionResult(true, null));
+            resolve(new ValidationResult(true, null));
           }
           else {
             resolve(
-              new ValidataionResult(
+              new ValidationResult(
                 false, 
                 new ValidationError(errorLog)
               )
@@ -290,7 +290,7 @@ class Blockchain {
   }
 }
 
-class ValidataionResult {
+class ValidationResult {
   constructor(isValid, error) {
     this.isValid = isValid;
     this.error = error;
@@ -321,7 +321,7 @@ class ValidationError extends Error {
 module.exports = {
   Block: Block,
   Blockchain: Blockchain,
-  ValidataionResult: ValidataionResult,
+  ValidataionResult: ValidationResult,
   ValidationError, ValidationError,
   init: async function () { db = await level('./db') },
   close: async function () { await db.close() }
