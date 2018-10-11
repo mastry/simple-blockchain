@@ -1,6 +1,7 @@
 const SHA256 = require('crypto-js/sha256');
 const level = require('level');
-let db = null;
+
+let db = null; // You must call the init() method before using the module!
 
 
 //-- Internal helper function
@@ -53,7 +54,7 @@ class Block {
    * The Block to convert to JSON
    */
   static toJSON(block) {
-    return JSON.stringify(block).toString();
+    return JSON.stringify(block);
   }
 
   /**
@@ -109,9 +110,17 @@ class Blockchain {
    * have the desired value (changing it later will invalidate the Blockchain).
    * 
    * @example
+   * const SimpleChain = require('./simpleChain');
+   * 
+   * await SimpleChain.init(); //-- IMPORTANT!
+   * 
+   * const chain = new SimpleChain.Blockchain();
+   * 
    * let block = new Block('some data');
-   * blockChain.addBlock(block);
+   * chain.addBlock(block);
    * console.log(block);
+   * 
+   * await SimpleChain.close(); //-- IMPORTANT!
    */
   async addBlock(newBlock) {
     try {
@@ -210,48 +219,111 @@ class Blockchain {
    * Validates the entire block chain. Calls validateBlock on every block
    * in the chain and confirms that previousBlockHash contains the 
    * correct has for the previous block in the chain.
+   * @returns {ValidationResult} 
+   * 
+   * @example
+   * const SimpleChain = require('./simpleChain');
+   * 
+   * await SimpleChain.init();  //-- IMPORTANT!
+   * 
+   * const chain = new SimpleChain.Blockchain();
+   * 
+   * // ... add blocks here ...
+   * 
+   * const result = await chain.validateChain();
+   * if( result.isValid ) {
+   *    console.log("All systems go.")
+   * } else {
+   *    console.log("Uh oh...")
+   *    for( let err of result.error.chainErrors ) {
+   *        consol.log(err);
+   *    } 
+   * }
+   * 
+   * await SimpleChain.close(); //-- IMPORTANT!
    */
-  validateChain() {
-    const errorLog = new Set();
-    let previousBlock = null;
+  async validateChain() {
+    
+    const promise = new Promise((resolve, reject) => {
+      
+      let stream = db.createReadStream();
+      const errorLog = new Set();
+        
+      stream.on('data', async (data) => {
+          
+          if (data.key != "height") { // skip our height indicator
 
-    db.createValueStream()
+            // Validate the individual block
+            const block = Block.fromJSON(data.value);
+            if (!this.validateBlock(block)) {
+              errorLog.add(`Block ${block.height} is invalid`);
+            }
 
-      .on('error', err => {
-        console.log('Unable to read key stream!', err)
-      })
-
-      .on('close', () => {
-        if (errorLog.length != 0) {
-          console.error("The chain is invalid:");
-          for (let e of errorLog) {
-            console.error(e);
+            // Ensure this block has the correct hash for the previous block
+            if(block.height > 0) {
+              let previousBlock = await this.getBlock(block.height-1);
+              if( block.previousBlockHash != previousBlock.hash) {
+                errorLog.add(`Block ${block.height} - previous hash is invalid.`);
+              }
+            }
           }
-        }
-      })
-
-      .on('data', currentBlock => {
-        // Validate the individual block
-        const block = Block.fromJSON(currentBlock);
-        if (!this.validateBlock(block)) {
-          errorLog.add(`Block ${block.height} is invalid`);
-        }
-
-        // Ensure this block has the correct hash for the previous block
-        if (previousBlock) {
-          if (block.previousBlockHash != previousBlock.hash) {
-            errorLog.add(`Block ${block.height} - invalid previousBlockHash.`);
+        })
+        .on('error', err => {
+          reject(err);
+        })
+        .on('close', () => {
+          if( errorLog.size == 0 ) {
+            resolve(new ValidataionResult(true, null));
           }
-        }
-      });
+          else {
+            resolve(
+              new ValidataionResult(
+                false, 
+                new ValidationError(errorLog)
+              )
+            );
+          }
+        })
+    })
 
-    return errorLog.size === 0;
+    return promise;
+  }
+}
+
+class ValidataionResult {
+  constructor(isValid, error) {
+    this.isValid = isValid;
+    this.error = error;
+  }
+}
+
+class ValidationError extends Error {
+  constructor(chainErrors, ...args) {
+      super(...args);
+      Error.captureStackTrace(this, ValidationError);
+
+      this._chainErrors = chainErrors;
+  }
+
+  /**
+   * A Set of error messages for the blockchain
+   * 
+   * @example
+   * for (let e of err.chainError) {
+   *    console.log(e)
+   * }
+   */
+  get chainErrors() {
+    return this._chainErrors;
   }
 }
 
 module.exports = {
   Block: Block,
   Blockchain: Blockchain,
+  ValidataionResult: ValidataionResult,
+  ValidationError, ValidationError,
   init: async function () { db = await level('./db') },
   close: async function () { await db.close() }
 }
+

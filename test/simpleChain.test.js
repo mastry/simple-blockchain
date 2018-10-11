@@ -44,8 +44,13 @@ test('Blockchain', async (t) => {
     const blockIsValid = chain.validateBlock(block2);
     t.equals(blockIsValid, true, 'Individual blocks validate')
 
-    const chainIsValid = chain.validateChain();
-    t.equals(chainIsValid, true, 'Blockchain validates all blocks');
+    const result = await chain.validateChain();
+    if(!result.isValid) {
+        for (let e of result.error.chainErrors) {
+            console.log(e);
+        }
+    }
+    t.equals(result.isValid, true, 'Blockchain validates all blocks');
 
     await SimpleChain.close();
     t.end();
