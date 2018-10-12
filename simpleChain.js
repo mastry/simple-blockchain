@@ -143,6 +143,8 @@ class Blockchain {
       // Save the new block to the data store
       await db.put(newBlock.height, Block.toJSON(newBlock));
       await db.put("height", newBlock.height);
+
+      return await this.getBlock(newBlock.height);
     }
     catch (error) {
       console.error("Blockchain.addBlock failed.", error)

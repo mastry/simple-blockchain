@@ -1,0 +1,9 @@
+
+GET http://localhost:8000/get/50 HTTP/1.1
+
+###
+
+POST http://localhost:8000/put HTTP/1.1
+content-type: application/json
+
+this is a rest test
