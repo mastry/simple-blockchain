@@ -5,7 +5,7 @@
   "main": "simpleChain.js",
   "scripts": {
     "test": "./node_modules/tape/bin/tape test/simpleChain.test.js  | ./node_modules/tap-spec/bin/cmd.js",
-    "doc": "jsdoc -c conf.json simpleChain.js",
+    "doc": "./node_modules/.bin/jsdoc simpleChain.js",
     "lint": "./node_modules/.bin/eslint server.js simpleChain.js",
     "lint-fix": "./node_modules/.bin/eslint server.js simpleChain.js --fix"
   },
@@ -23,6 +23,7 @@
     "eslint-plugin-node": "^7.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
+    "jsdoc": "^3.5.5",
     "tap-spec": "^5.0.0",
     "tape": "^4.9.1"
   }
