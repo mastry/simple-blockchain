@@ -33,7 +33,7 @@ app.get('/get/:blockHeight', async (req, res, next) => {
   }
 })
 
-app.post('/put', async (req, res, next) => {
+app.post('/block', async (req, res, next) => {
   try {
     if (!req.rawBody || req.rawBody === '') {
       res.status(400).send('Empty block. Try including some data in the Block body.')
