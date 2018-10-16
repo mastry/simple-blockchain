@@ -5,7 +5,9 @@
   "main": "simpleChain.js",
   "scripts": {
     "test": "./node_modules/tape/bin/tape test/simpleChain.test.js  | ./node_modules/tap-spec/bin/cmd.js",
-    "doc": "jsdoc -c conf.json simpleChain.js"
+    "doc": "jsdoc -c conf.json simpleChain.js",
+    "lint": "./node_modules/.bin/eslint server.js simpleChain.js",
+    "lint-fix": "./node_modules/.bin/eslint server.js simpleChain.js --fix"
   },
   "author": "Jeff Mastry",
   "license": "ISC",
