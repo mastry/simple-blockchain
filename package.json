@@ -4,7 +4,8 @@
   "description": "A very simple blockchain implementation",
   "main": "simple-blockchain.js",
   "scripts": {
-    "test": "./node_modules/tape/bin/tape test/simple-blockchain.test.js  | ./node_modules/tap-spec/bin/cmd.js",
+    "test-blockchain": "./node_modules/tape/bin/tape test/simple-blockchain.test.js  | ./node_modules/tap-spec/bin/cmd.js",
+    "test-server": "./node_modules/tape/bin/tape test/server.test.js  | ./node_modules/tap-spec/bin/cmd.js",
     "doc": "./node_modules/.bin/jsdoc simple-blockchain.js",
     "lint": "./node_modules/.bin/eslint server.js simple-blockchain.js",
     "lint-fix": "./node_modules/.bin/eslint server.js simple-blockchain.js --fix"

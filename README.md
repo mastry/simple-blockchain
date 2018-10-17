@@ -48,7 +48,7 @@ curl http://localhost:8000/get/42
 If there is no block with the specified height, the endpoint returns 404.
 
 ### /block
-This endpoint adds a new block to the blockchain. It's an HTTP POST method that expects the block body to be in the body of the POST. You can clal it with curl like this:
+This endpoint adds a new block to the blockchain. It's an HTTP POST method that expects the block body to be in the body of the POST. You can call it with curl like this:
 
 ```bash
 curl -d "block body goes here" -X POST http://localhost:8000/block
@@ -58,13 +58,18 @@ The new Block is returned.
 
 ## Running the tests
 
-Automated tests are located in tests/simple-blockchain.test.js. You can run that file with node directly.
+Automated tests are located in the tests folder. Ther you will find a test script for simple-blockchain and one for server. 
+
+* simple-blockchain.test.js
+* server.test.js
+
+You can run each of these with node directly. For example...
 
 ```bash
 node test/simple-blockchain.test.js
 ```
 
-This will dsply results similar to this:
+This will display results similar to this:
 ```
 TAP version 13
 # Block
@@ -90,9 +95,13 @@ ok 13 Blockchain validates all blocks
 # ok
 ```
 
-You can also run the configured NPM script that uses Tape for a nicely formatted ouput:
+You can also run the configured NPM scripts that use Tape for nicely formatted ouput.
+
+* test-blockchain
+* test-server
+
 ```bash
-npm run-script test
+npm run-script test-blockchain
 ```
 
 ```
@@ -141,6 +150,7 @@ npm run-script lint-fix
 
 * [Express](http://www.dropwizard.io/1.0.2/docs/) - Implementation of REST API
 * [Tape](https://maven.apache.org/) - Testing framework
+* [SuperTest](https://github.com/visionmedia/supertest) - REST API testing
 * [JSDoc](https://rometools.github.io/rome/) - Documentation generator
 * [level](http://leveldb.org) - Key/value store for blockchain data
 
