@@ -1,9 +1,9 @@
 
-GET http://localhost:8000/get/7 HTTP/1.1
+GET http://localhost:8000/block/1 HTTP/1.1
 
 ###
 
 POST http://localhost:8000/block HTTP/1.1
 content-type: application/json
 
-this is a rest test 2018-10-16
+this is a rest test 2018-10-17

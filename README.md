@@ -29,7 +29,7 @@ Create some test data and run the tests:
 node test/simple-blockchain.test.js
 ```
 
-To view blocks in your browser, run the command below and then open your browser to [http://localhost:8000/get/0](http://localhost:8000/get/0). Change the number at the end of that URL to view a different block.
+To view blocks in your browser, run the command below and then open your browser to [http://localhost:8000/get/0](http://localhost:8000/block/0). Change the number at the end of that URL to view a different block.
 ```bash
 node server.js
 ```
@@ -38,7 +38,7 @@ node server.js
 
 The REST API server (see Getting Started above) exposes the two endpoints described below.
 
-### /get/{height}
+### /block/{height}
 This endpoint gets the block with height {height}. For example, to get the block with height 42 with curl:
 
 ```bash

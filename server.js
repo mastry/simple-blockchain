@@ -19,7 +19,7 @@ let rawTextParser = (req, res, next) => {
 
 app.use(rawTextParser)
 
-app.get('/get/:blockHeight', async (req, res, next) => {
+app.get('/block/:blockHeight', async (req, res, next) => {
   try {
     const blockHeight = parseInt(req.params.blockHeight)
     const block = await chain.getBlock(blockHeight)
@@ -52,7 +52,6 @@ simpleChain.init()
   .then(() => {
     if (require.main === module) {
       app.listen(port, async () => {
-        await simpleChain.init()
         console.log(`Listening on port ${port}`)
       })
     }
