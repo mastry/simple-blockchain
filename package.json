@@ -2,12 +2,12 @@
   "name": "simple-blockchain",
   "version": "1.0.0",
   "description": "A very simple blockchain implementation",
-  "main": "simpleChain.js",
+  "main": "simple-blockchain.js",
   "scripts": {
-    "test": "./node_modules/tape/bin/tape test/simpleChain.test.js  | ./node_modules/tap-spec/bin/cmd.js",
-    "doc": "./node_modules/.bin/jsdoc simpleChain.js",
-    "lint": "./node_modules/.bin/eslint server.js simpleChain.js",
-    "lint-fix": "./node_modules/.bin/eslint server.js simpleChain.js --fix"
+    "test": "./node_modules/tape/bin/tape test/simple-blockchain.test.js  | ./node_modules/tap-spec/bin/cmd.js",
+    "doc": "./node_modules/.bin/jsdoc simple-blockchain.js",
+    "lint": "./node_modules/.bin/eslint server.js simple-blockchain.js",
+    "lint-fix": "./node_modules/.bin/eslint server.js simple-blockchain.js --fix"
   },
   "author": "Jeff Mastry",
   "license": "ISC",

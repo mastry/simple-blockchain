@@ -1,4 +1,4 @@
-const simpleChain = require('./simpleChain')
+const simpleChain = require('./simple-blockchain')
 const chain = new simpleChain.Blockchain()
 
 const express = require('express')

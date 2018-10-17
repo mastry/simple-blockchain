@@ -1,5 +1,5 @@
 const test = require('tape').test
-const SimpleChain = require('../simpleChain')
+const SimpleChain = require('../simple-blockchain')
 
 test('Block', (t) => {
   let block = new SimpleChain.Block('test')

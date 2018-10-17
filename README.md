@@ -34,6 +34,28 @@ To view blocks in your browser, run the command below and then open your browser
 node server.js
 ```
 
+## Using the REST API
+
+The REST API server (see Getting Started above) exposes the two endpoints described below.
+
+### /get/{height}
+This endpoint gets the block with height {height}. For example, to get the block with height 42 with curl:
+
+```bash
+curl http://localhost:8000/get/42
+```
+
+If there is no block with the specified height, the endpoint returns 404.
+
+### /block
+This endpoint adds a new block to the blockchain. It's an HTTP POST method that expects the block body to be in the body of the POST. You can clal it with curl like this:
+
+```bash
+curl -d "block body goes here" -X POST http://localhost:8000/block
+```
+The new Block is returned.
+
+
 ## Running the tests
 
 Automated tests are located in tests/simple-blockchain.test.js. You can run that file with node directly.
@@ -76,27 +98,27 @@ npm run-script test
 ```
 Block
 
-    ✔ Cloned data should be equal
-    ✔ Cloned hash should be equal
-    ✔ Cloned height should be equal
-    ✔ Cloned previousBlockHash should be equal
-    ✔ Cloned time should be equal
+  ✔ Cloned data should be equal
+  ✔ Cloned hash should be equal
+  ✔ Cloned height should be equal
+  ✔ Cloned previousBlockHash should be equal
+  ✔ Cloned time should be equal
 
-  Blockchain
+Blockchain
 
-    ✔ Block height should be at least 1
-    ✔ Genesis block previous block hash is 0
-    ✔ Genesis block height is zero
-    ✔ Genesis block body is correct
-    ✔ Hashes are chained properly
-    ✔ Block height increases
-    ✔ Individual blocks validate
-    ✔ Blockchain validates all blocks
+  ✔ Block height should be at least 1
+  ✔ Genesis block previous block hash is 0
+  ✔ Genesis block height is zero
+  ✔ Genesis block body is correct
+  ✔ Hashes are chained properly
+  ✔ Block height increases
+  ✔ Individual blocks validate
+  ✔ Blockchain validates all blocks
 
 
-  total:     13
-  passing:   13
-  duration:  50ms
+total:     13
+passing:   13
+duration:  50ms
 ```
 
 ### Manual tests
@@ -114,10 +136,6 @@ The other script will automatically fix lint issues:
 ```bash 
 npm run-script lint-fix
 ```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
 
 ## Built With
 
