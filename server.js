@@ -40,14 +40,25 @@ app.post('/block', async (req, res, next) => {
     } else {
       let block = new simpleChain.Block(req.rawBody)
       block = await chain.addBlock(block)
-      res.send(block)
+      res.setHeader('Content-Type', 'application/json')
+      res.status(200).send(block)
     }
   } catch (err) {
     next(err)
   }
 })
 
-app.listen(port, async () => {
-  await simpleChain.init()
-  console.log(`Listening on port ${port}`)
-})
+simpleChain.init()
+  .then(() => {
+    if (require.main === module) {
+      app.listen(port, async () => {
+        await simpleChain.init()
+        console.log(`Listening on port ${port}`)
+      })
+    }
+  })
+  .catch(err => {
+    console.log(err)
+  })
+
+module.exports = app // For testing only
