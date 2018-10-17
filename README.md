@@ -165,5 +165,6 @@ This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.t
 
 ## Acknowledgments
 
-* 
+* JP Richardson for [this code snippet](https://stackoverflow.com/a/12345876)
+
 
