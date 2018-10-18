@@ -23,12 +23,12 @@ app.get('/block/:blockHeight', async (req, res, next) => {
   try {
     const blockHeight = parseInt(req.params.blockHeight)
     const block = await chain.getBlock(blockHeight)
-    res.status(200).send(block)
+    res.status(200).json(block)
   } catch (err) {
     if (err.notFound) {
-      res.status(404).send('Block not found')
+      res.status(404).json('Block not found')
     } else {
-      next(err)
+      res.status(500).json({ error: err.toString() })
     }
   }
 })
@@ -36,15 +36,14 @@ app.get('/block/:blockHeight', async (req, res, next) => {
 app.post('/block', async (req, res, next) => {
   try {
     if (!req.rawBody || req.rawBody === '') {
-      res.status(400).send('Empty block. Try including some data in the Block body.')
+      res.status(400).json({ error: 'Empty block. Try including some data in the Block body.' })
     } else {
       let block = new simpleChain.Block(req.rawBody)
       block = await chain.addBlock(block)
-      res.setHeader('Content-Type', 'application/json')
-      res.status(200).send(block)
+      res.status(200).json(block)
     }
   } catch (err) {
-    next(err)
+    res.status(500).json({ error: err.toString() })
   }
 })
 

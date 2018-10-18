@@ -23,6 +23,14 @@ test('Server', async (t) => {
       t.equals(res.body.body, 'Genesis Block', '/block/0 retrieves genesis block')
       t.equals(res.body.height, 0, '/block/0 block height is zero')
       t.equals(res.body.previousBlockHash, '0', '/block/0 previousBlockHash === 0')
+    })
+
+  request(app)
+    .get('/block/-1')
+    .expect('Content-Type', 'application/json; charset=utf-8')
+    .expect(404)
+    .end((err, res) => {
+      t.equals(err, null, 'Invalid block height returns JSON 404 error')
       t.end()
     })
 })
