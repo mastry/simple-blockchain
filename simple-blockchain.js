@@ -118,13 +118,7 @@ class Blockchain {
     try {
       let currentHeight = await this.getBlockHeight()
 
-      // Add a genesis block if we don't already have one
-      if (currentHeight < 0) {
-        currentHeight = 0
-        const genesisBlock = createGenesisBlock()
-        await db.put(currentHeight, Block.toJSON(genesisBlock))
-        await db.put('height', 0)
-      }
+      if (currentHeight === -1) { throw Error('Genesis block does not exist!') }
 
       newBlock.height = currentHeight + 1
       const prevBlock = await this.getBlock(currentHeight)
@@ -298,11 +292,29 @@ class ValidationError extends Error {
   }
 }
 
+async function init () {
+  try {
+    db = await level('./db')
+
+    // this will throw err.notFound if there is no genesis block
+    await db.get(0)
+  } catch (err) {
+    if (err.notFound) {
+    // Genesis block not found so add one
+      const genesisBlock = createGenesisBlock()
+      await db.put(0, Block.toJSON(genesisBlock))
+      await db.put('height', 0)
+    } else {
+      throw err
+    }
+  }
+}
+
 module.exports = {
   Block: Block,
   Blockchain: Blockchain,
   ValidataionResult: ValidationResult,
   ValidationError: ValidationError,
-  init: async function () { db = await level('./db') },
+  init: init,
   close: async function () { await db.close() }
 }
