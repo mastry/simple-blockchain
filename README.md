@@ -51,7 +51,7 @@ If there is no block with the specified height, the endpoint returns 404.
 This endpoint adds a new block to the blockchain. It's an HTTP POST method that expects the block body to be in the body of the POST. You can call it with curl like this:
 
 ```bash
-curl -d "block body goes here" -X POST http://localhost:8000/block
+curl -X "POST" "http://localhost:8000/block" -H 'Content-Type: application/json' -d $'{"body": "block body contents"}'
 ```
 The new Block is returned.
 

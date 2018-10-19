@@ -3,15 +3,15 @@ const request = require('supertest')
 const app = require('../server')
 
 test('Server', async (t) => {
-  const blockBody = 'this is the block data'
+  const input = { body: 'this is the block data' }
   request(app)
     .post('/block')
-    .send(blockBody)
+    .send(input)
     .expect('Content-Type', 'application/json; charset=utf-8')
     .expect(200)
     .end((err, res) => {
       t.equals(err, null, '/block POST succeeds')
-      t.equals(res.body.body, blockBody, '/block POST returns correct body')
+      t.equals(res.body.body, input.body, '/block POST returns correct body')
     })
 
   request(app)

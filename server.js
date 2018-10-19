@@ -5,19 +5,10 @@ const express = require('express')
 const app = express()
 const port = 8000
 
-// Parses the body of a POST as raw UTF8 text
-let rawTextParser = (req, res, next) => {
-  req.setEncoding('utf8')
-  req.rawBody = ''
-  req.on('data', chunk => {
-    req.rawBody += chunk
-  })
-  req.on('end', () => {
-    next()
-  })
-}
-
-app.use(rawTextParser)
+// Use body-parser for JSON parsing
+const bodyParser = require('body-parser')
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
 app.get('/block/:blockHeight', async (req, res, next) => {
   try {
@@ -35,10 +26,11 @@ app.get('/block/:blockHeight', async (req, res, next) => {
 
 app.post('/block', async (req, res, next) => {
   try {
-    if (!req.rawBody || req.rawBody === '') {
+    const blockBody = req.body.body
+    if (!blockBody || blockBody === '') {
       res.status(400).json({ error: 'Empty block. Try including some data in the Block body.' })
     } else {
-      let block = new simpleChain.Block(req.rawBody)
+      let block = new simpleChain.Block(blockBody)
       block = await chain.addBlock(block)
       res.status(200).json(block)
     }
