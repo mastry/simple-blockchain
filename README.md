@@ -42,7 +42,7 @@ The REST API server (see Getting Started above) exposes the two endpoints descri
 This endpoint gets the block with height {height}. For example, to get the block with height 42 with curl:
 
 ```bash
-curl http://localhost:8000/get/42
+curl http://localhost:8000/block/42
 ```
 
 If there is no block with the specified height, the endpoint returns 404.
