@@ -14,7 +14,7 @@ function computeHash (block) {
 function createGenesisBlock () {
   let block = new Block('Genesis Block')
   block.time = getTime()
-  block.previousBlockHash = '0'
+  block.previousBlockHash = ''
   block.hash = computeHash(block)
   return block
 }

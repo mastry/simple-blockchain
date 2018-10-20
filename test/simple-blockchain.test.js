@@ -28,7 +28,7 @@ test('Blockchain', async (t) => {
   t.equals(height > 0, true, 'Block height should be at least 1')
 
   let gBlock = await chain.getBlock(0)
-  t.equals(gBlock.previousBlockHash, '0', 'Genesis block previous block hash is 0')
+  t.equals(gBlock.previousBlockHash, '', 'Genesis block previous block hash is empty')
   t.equals(gBlock.height, 0, 'Genesis block height is zero')
   t.equals(gBlock.body, 'Genesis Block', 'Genesis block body is correct')
 

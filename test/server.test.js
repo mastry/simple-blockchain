@@ -22,7 +22,7 @@ test('Server', async (t) => {
       t.equals(err, null, '/block/0 succeeds')
       t.equals(res.body.body, 'Genesis Block', '/block/0 retrieves genesis block')
       t.equals(res.body.height, 0, '/block/0 block height is zero')
-      t.equals(res.body.previousBlockHash, '0', '/block/0 previousBlockHash === 0')
+      t.equals(res.body.previousBlockHash, '', '/block/0 previousBlockHash is empty')
     })
 
   request(app)
