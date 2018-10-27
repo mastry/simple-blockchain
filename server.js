@@ -1,6 +1,8 @@
 const simpleChain = require('./simple-blockchain')
 const chain = new simpleChain.Blockchain()
 
+const controller = require('./star-registry')
+
 const express = require('express')
 const app = express()
 const port = 8000
@@ -9,6 +11,23 @@ const port = 8000
 const bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+
+app.post('/requestValidation', async (req, res, next) => {
+  try {
+    const result = controller.requestValidation(req.body.address)
+    if (result.err) {
+      res.status(500).json({ error: result.err })
+    } else {
+      res.status(200).json(result.response)
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.toString() })
+  }
+})
+
+app.post('/message-signature/validate', async (req, res, next) => {
+  controller.validate(req.body.address)
+})
 
 app.get('/block/:blockHeight', async (req, res, next) => {
   try {

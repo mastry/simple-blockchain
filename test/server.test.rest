@@ -1,9 +1,17 @@
 
+POST http://localhost:8000/requestValidation
+Content-Type: application/json
+
+{
+  "address": "abc123"
+}
+
+###
 GET http://localhost:8000/block/1 HTTP/1.1
 
 ###
 
 POST http://localhost:8000/block HTTP/1.1
-content-type: application/json
+Content-Type: application/json
 
-this is a rest test 2018-10-17
+{'body': 'this is a rest test 2018-10-17'}

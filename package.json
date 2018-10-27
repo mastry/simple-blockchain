@@ -6,6 +6,7 @@
   "scripts": {
     "test-blockchain": "./node_modules/tape/bin/tape test/simple-blockchain.test.js  | ./node_modules/tap-spec/bin/cmd.js",
     "test-server": "./node_modules/tape/bin/tape test/server.test.js  | ./node_modules/tap-spec/bin/cmd.js",
+    "test-star-registry": "./node_modules/tape/bin/tape test/star-registry.test.js  | ./node_modules/tap-spec/bin/cmd.js",
     "doc": "./node_modules/.bin/jsdoc simple-blockchain.js",
     "lint": "./node_modules/.bin/eslint server.js simple-blockchain.js",
     "lint-fix": "./node_modules/.bin/eslint server.js simple-blockchain.js --fix"
@@ -15,7 +16,8 @@
   "dependencies": {
     "crypto-js": "^3.1.9-1",
     "express": "^4.16.4",
-    "level": "^4.0.0"
+    "level": "^4.0.0",
+    "node-cache": "^4.2.0"
   },
   "devDependencies": {
     "eslint": "^5.7.0",
