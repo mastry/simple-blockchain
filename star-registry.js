@@ -1,3 +1,4 @@
+// Create an in-memory cache that automatically deletes items after 5 minutes (330 seconds)
 const NodeCache = require('node-cache')
 const CACHE_TIMEOUT_SECONDS = 300
 const cache = new NodeCache({ stdTTL: CACHE_TIMEOUT_SECONDS })
@@ -6,22 +7,22 @@ var bitcoin = require('bitcoinjs-lib')
 var bitcoinMessage = require('bitcoinjs-message')
 
 class Validator {
-  constructor(address) {
+  constructor (address) {
     this.requestTimeStamp = Date.now()
     this.address = address
     this.message = `${address}:${this.requestTimeStamp}:starRegistry`
   }
 
-  get validationWindow() {
+  get validationWindow () {
     const now = Date.now()
     const elapsed = Math.floor(now - this.requestTimeStamp) / 1000
     const remaining = CACHE_TIMEOUT_SECONDS - elapsed
     return remaining
   }
 
-  validate(signature) {
-    if (this.validationWindow <= 0) { 
-      return false 
+  validate (signature) {
+    if (this.validationWindow <= 0) {
+      return false
     }
 
     return bitcoinMessage.verify(this.message, this.address, signature)
@@ -41,7 +42,7 @@ exports.requestValidation = (address) => {
 exports.validate = (address, signature) => {
   let validator = cache.get(address)
   if (validator === undefined) {
-    throw Error("Address not found. Use requestValidation to initiate a validation request.")
+    throw Error('Address not found. Use requestValidation to initiate a validation request.')
   }
 
   const isValid = validator.validate(signature)
@@ -60,8 +61,34 @@ exports.validate = (address, signature) => {
   return { err: null, response: registration }
 }
 
-exports.register = (req, res) => {
+exports.register = async (address, ra, dec, story) => {
+  let validator = cache.get(address)
+  if (validator === undefined) {
+    throw Error('Address not found. Use requestValidation to initiate a validation request.')
+  }
 
+  if (validator.validationWindow <= 0) {
+    throw Error(`Validation window has exppired for address ${address}`)
+  }
+
+  const SimpleChain = require('./simple-blockchain')
+  await SimpleChain.init()
+
+  const starBlock = {
+    address: validator.address,
+    star: {
+      dec: dec,
+      ra: ra,
+      story: Buffer.from(story).toString('hex')
+    }
+  }
+  const chain = new SimpleChain.Blockchain()
+  let block = new SimpleChain.Block(JSON.stringify(starBlock))
+  block = await chain.addBlock(block)
+
+  await SimpleChain.close()
+
+  return { err: null, response: block }
 }
 
 exports.searchHash = (req, res) => {

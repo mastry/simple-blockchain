@@ -21,20 +21,33 @@ test('requestValidation', async (t) => {
   t.end()
 })
 
-test('validate', (t) => {
-  var bitcoin = require('bitcoinjs-lib')
-  var bitcoinMessage = require('bitcoinjs-message')
+test('validate', async (t) => {
+  try {
+    var bitcoin = require('bitcoinjs-lib')
+    var bitcoinMessage = require('bitcoinjs-message')
 
-  // Generate a random key pair / address on testnet
-  const keyPair = bitcoin.ECPair.makeRandom({ network: bitcoin.networks.testnet })
-  const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks.testnet })
+    // Generate a random key pair / address on testnet
+    const keyPair = bitcoin.ECPair.makeRandom({ network: bitcoin.networks.testnet })
+    const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks.testnet })
 
-  // Sign the message and submit for validation
-  const registry = require('../star-registry')
-  const validation = registry.requestValidation(address)
-  var signature = bitcoinMessage.sign(validation.response.message, keyPair.privateKey, keyPair.compressed)
-  let isValid = registry.validate(address, signature).response.registerStar
+    // Sign the message and submit for validation
+    const registry = require('../star-registry')
+    const validation = registry.requestValidation(address)
+    var signature = bitcoinMessage.sign(validation.response.message, keyPair.privateKey, keyPair.compressed)
+    let isValid = registry.validate(address, signature).response.registerStar
+    t.equals(isValid, true, 'Valid signatures validate')
 
-  t.equals(isValid, true, 'Valid signatures validate')
-  t.end()
+    // Register the star
+    const story = 'Found star using https://www.google.com/sky/'
+    const result = await registry.register(address, '16h 29m 1.0s', '-26° 29\' 24.9', story)
+    const block = JSON.parse(result.response.body)
+    t.equals(block.address, address, 'Registration address is correct')
+    t.equals(block.star.ra, '16h 29m 1.0s', 'Right ascension is correct')
+    t.equals(block.star.dec, '-26° 29\' 24.9', 'Declination is correct')
+    t.equals(Buffer.from(block.star.story, 'hex').toString(), story, 'Story is correct')
+  } catch (e) {
+    console.log(`ERROR: ${e}`)
+  } finally {
+    t.end()
+  }
 })
