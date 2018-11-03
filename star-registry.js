@@ -30,13 +30,19 @@ class Validator {
 }
 
 exports.requestValidation = (address) => {
-  let validator = cache.get(address)
-  if (validator === undefined) {
-    validator = new Validator(address)
-    cache.set(address, validator)
-  }
+  return new Promise((resolve, reject) => {
+    try {
+      let validator = cache.get(address)
+      if (validator === undefined) {
+        validator = new Validator(address)
+        cache.set(address, validator)
+      }
 
-  return { err: null, response: validator }
+      resolve(validator)
+    } catch (e) {
+      reject(e)
+    }
+  })
 }
 
 exports.validate = (address, signature) => {

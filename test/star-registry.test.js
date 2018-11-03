@@ -6,16 +6,16 @@ function sleep (ms) {
 
 test('requestValidation', async (t) => {
   const registry = require('../star-registry')
-  let result = registry.requestValidation('abc123')
-  t.equals('abc123', result.response.address, 'Registered address is correct')
-  t.equals(true, result.response.requestTimeStamp <= Date.now(), 'Timestamp is reasonable')
-  t.equals(true, result.response.validationWindow <= 300, 'Initial validation window is <= 300 seconds')
-  t.equals(`abc123:${result.response.requestTimeStamp}:starRegistry`, result.response.message, 'Message is formatted correctly')
+  let result = await registry.requestValidation('abc123')
+  t.equals('abc123', result.address, 'Registered address is correct')
+  t.equals(true, result.requestTimeStamp <= Date.now(), 'Timestamp is reasonable')
+  t.equals(true, result.validationWindow <= 300, 'Initial validation window is <= 300 seconds')
+  t.equals(`abc123:${result.requestTimeStamp}:starRegistry`, result.message, 'Message is formatted correctly')
 
   // Additional validation requests with same address should just return remaining time
-  const result1 = registry.requestValidation('abc123').response.validationWindow
+  const result1 = (await registry.requestValidation('abc123')).validationWindow
   await sleep(1000)
-  const result2 = registry.requestValidation('abc123').response.validationWindow
+  const result2 = (await registry.requestValidation('abc123')).validationWindow
   t.equals(true, result2 < result1, 'Validation window shrinks')
   registry.close()
   t.end()
@@ -32,8 +32,8 @@ test('validate', async (t) => {
 
     // Sign the message and submit for validation
     const registry = require('../star-registry')
-    const validation = registry.requestValidation(address)
-    var signature = bitcoinMessage.sign(validation.response.message, keyPair.privateKey, keyPair.compressed)
+    const validation = await registry.requestValidation(address)
+    var signature = bitcoinMessage.sign(validation.message, keyPair.privateKey, keyPair.compressed)
     let isValid = registry.validate(address, signature).response.registerStar
     t.equals(isValid, true, 'Valid signatures validate')
 
@@ -63,8 +63,8 @@ test('search', async (t) => {
 
     // Sign the message and submit for validation
     const registry = require('../star-registry')
-    const validation = registry.requestValidation(address)
-    var signature = bitcoinMessage.sign(validation.response.message, keyPair.privateKey, keyPair.compressed)
+    const validation = await registry.requestValidation(address)
+    var signature = bitcoinMessage.sign(validation.message, keyPair.privateKey, keyPair.compressed)
     let isValid = registry.validate(address, signature).response.registerStar
 
     // Register the star
@@ -84,7 +84,7 @@ test('search', async (t) => {
     const heightBlock = await registry.searchHeight(result.response.height)
     t.equals(heightBlock.response.hash === result.response.hash, true, 'Finds correct match by height')
   } catch (e) {
-    console.log(`ERROR: ${e}`)
+    t.fail(e.message, e)
   } finally {
     t.end()
   }

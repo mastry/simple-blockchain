@@ -12,17 +12,18 @@ const bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-app.post('/requestValidation', async (req, res, next) => {
-  try {
-    const result = controller.requestValidation(req.body.address)
-    if (result.err) {
-      res.status(500).json({ error: result.err })
-    } else {
-      res.status(200).json(result.response)
-    }
-  } catch (e) {
-    res.status(500).json({ error: e.toString() })
-  }
+// Error handling
+app.use((err, request, response, next) => {
+  console.log(err)
+  response.status(500).send(err.message)
+})
+
+app.post('/requestValidation', (req, res, next) => {
+  controller.requestValidation(req.body.address)
+    .then(response => {
+      res.status(200).json(response)
+    })
+    .catch(next)
 })
 
 app.post('/message-signature/validate', async (req, res, next) => {
