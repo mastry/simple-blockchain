@@ -91,16 +91,55 @@ exports.register = async (address, ra, dec, story) => {
   return { err: null, response: block }
 }
 
-exports.searchHash = (req, res) => {
+exports.searchHash = async (hash) => {
+  try {
+    let block = null
+    const SimpleChain = require('./simple-blockchain')
+    await SimpleChain.init()
+    const chain = new SimpleChain.Blockchain()
+    const height = await chain.getBlockHeight()
+    for (let index = 1; index <= height; index++) {
+      const b = await chain.getBlock(index)
+      if (b.hash === hash) {
+        block = b
+        break
+      }
+    }
 
+    await SimpleChain.close()
+
+    return { err: null, response: block }
+  } catch (e) {
+    return { err: e, response: null }
+  }
 }
 
-exports.searchAddress = (req, res) => {
+exports.searchAddress = async (address) => {
+  let blocks = []
+  const SimpleChain = require('./simple-blockchain')
+  await SimpleChain.init()
+  const chain = new SimpleChain.Blockchain()
+  for (let index = 1; index <= await chain.getBlockHeight(); index++) {
+    const block = await chain.getBlock(index)
+    const body = JSON.parse(block.body)
+    if (body.address === address) {
+      blocks.push(block)
+    }
+  }
 
+  await SimpleChain.close()
+
+  return { err: null, response: blocks }
 }
 
-exports.searchHeight = (req, res) => {
+exports.searchHeight = async (height) => {
+  const SimpleChain = require('./simple-blockchain')
+  await SimpleChain.init()
+  const chain = new SimpleChain.Blockchain()
+  const block = await chain.getBlock(height)
+  await SimpleChain.close()
 
+  return { err: null, response: block }
 }
 
 exports.close = () => {
