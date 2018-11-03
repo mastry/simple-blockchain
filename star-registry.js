@@ -46,25 +46,31 @@ exports.requestValidation = (address) => {
 }
 
 exports.validate = (address, signature) => {
-  let validator = cache.get(address)
-  if (validator === undefined) {
-    throw Error('Address not found. Use requestValidation to initiate a validation request.')
-  }
+  return new Promise((resolve, reject) => {
+    try {
+      let validator = cache.get(address)
+      if (validator === undefined) {
+        reject(Error('Address not found. Use requestValidation to initiate a validation request.'))
+      }
 
-  const isValid = validator.validate(signature)
+      const isValid = validator.validate(signature)
 
-  const registration = {
-    'registerStar': isValid,
-    'status': {
-      'address': validator.address,
-      'requestTimeStamp': validator.startTime,
-      'message': validator.message,
-      'validationWindow': validator.validationWindow,
-      'messageSignature': isValid ? 'valid' : 'invalid'
+      const registration = {
+        'registerStar': isValid,
+        'status': {
+          'address': validator.address,
+          'requestTimeStamp': validator.startTime,
+          'message': validator.message,
+          'validationWindow': validator.validationWindow,
+          'messageSignature': isValid ? 'valid' : 'invalid'
+        }
+      }
+
+      resolve(registration)
+    } catch (e) {
+      reject(e)
     }
-  }
-
-  return { err: null, response: registration }
+  })
 }
 
 exports.register = async (address, ra, dec, story) => {

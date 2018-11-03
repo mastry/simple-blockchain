@@ -34,7 +34,7 @@ test('validate', async (t) => {
     const registry = require('../star-registry')
     const validation = await registry.requestValidation(address)
     var signature = bitcoinMessage.sign(validation.message, keyPair.privateKey, keyPair.compressed)
-    let isValid = registry.validate(address, signature).response.registerStar
+    let isValid = (await registry.validate(address, signature)).registerStar
     t.equals(isValid, true, 'Valid signatures validate')
 
     // Register the star
@@ -65,7 +65,7 @@ test('search', async (t) => {
     const registry = require('../star-registry')
     const validation = await registry.requestValidation(address)
     var signature = bitcoinMessage.sign(validation.message, keyPair.privateKey, keyPair.compressed)
-    let isValid = registry.validate(address, signature).response.registerStar
+    await registry.validate(address, signature)
 
     // Register the star
     const story = 'Found star using https://www.google.com/sky/'

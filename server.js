@@ -27,16 +27,11 @@ app.post('/requestValidation', (req, res, next) => {
 })
 
 app.post('/message-signature/validate', async (req, res, next) => {
-  const result = controller.validate(req.body.address, req.body.signature)
-  try {
-    if (result.err) {
-      res.status(500).json({ error: result.err })
-    } else {
-      res.status(200).json(result.response)
-    }
-  } catch (e) {
-    res.status(500).json({ error: result.err })
-  }
+  controller.validate(req.body.address, req.body.signature)
+    .then(response => {
+      res.status(200).json(response)
+    })
+    .catch(next)
 })
 
 app.get('/block/:blockHeight', async (req, res, next) => {
