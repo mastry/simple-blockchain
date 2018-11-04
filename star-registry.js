@@ -27,6 +27,15 @@ class Validator {
 
     return bitcoinMessage.verify(this.message, this.address, signature)
   }
+
+  toJSON () {
+    return {
+      'address': this.address,
+      'requestTimeStamp': this.requestTimeStamp,
+      'message': this.message,
+      'validationWindow': this.validationWindow
+    }
+  }
 }
 
 class StarRegistryError extends Error {
@@ -73,7 +82,7 @@ exports.validate = (address, signature) => {
         'registerStar': isValid,
         'status': {
           'address': validator.address,
-          'requestTimeStamp': validator.startTime,
+          'requestTimeStamp': validator.requestTimeStamp,
           'message': validator.message,
           'validationWindow': validator.validationWindow,
           'messageSignature': isValid ? 'valid' : 'invalid'
