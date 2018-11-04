@@ -48,9 +48,22 @@ app.get('/block/:blockHeight', async (req, res, next) => {
   }
 })
 
+app.get('/stars/address::address', async (req, res, next) => {
+  try {
+    const blocks = await controller.searchAddress(req.params.address)
+    res.status(200).json(blocks)
+  } catch (err) {
+    if (err.notFound) {
+      res.status(404).json('Block not found')
+    } else {
+      res.status(500).json({ error: err.toString() })
+    }
+  }
+})
+
 app.post('/block', async (req, res, next) => {
   try {
-    const blockBody = req.body.body
+    const blockBody = req.body
     if (!blockBody || blockBody === '') {
       res.status(400).json({ error: 'Empty block. Try including some data in the Block body.' })
     } else {
