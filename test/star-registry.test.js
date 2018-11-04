@@ -1,11 +1,11 @@
 const test = require('tape').test
+const registry = require('../star-registry')
 
 function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 test('requestValidation', async (t) => {
-  const registry = require('../star-registry')
   let result = await registry.requestValidation('abc123')
   t.equals('abc123', result.address, 'Registered address is correct')
   t.equals(true, result.requestTimeStamp <= Date.now(), 'Timestamp is reasonable')
@@ -31,7 +31,6 @@ test('validate', async (t) => {
     const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks.testnet })
 
     // Sign the message and submit for validation
-    const registry = require('../star-registry')
     const validation = await registry.requestValidation(address)
     var signature = bitcoinMessage.sign(validation.message, keyPair.privateKey, keyPair.compressed)
     let isValid = (await registry.validate(address, signature)).registerStar
@@ -62,7 +61,6 @@ test('search', async (t) => {
     const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks.testnet })
 
     // Sign the message and submit for validation
-    const registry = require('../star-registry')
     const validation = await registry.requestValidation(address)
     var signature = bitcoinMessage.sign(validation.message, keyPair.privateKey, keyPair.compressed)
     await registry.validate(address, signature)
@@ -86,6 +84,7 @@ test('search', async (t) => {
   } catch (e) {
     t.fail(e.message, e)
   } finally {
+    registry.close()
     t.end()
   }
 })
