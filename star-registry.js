@@ -51,146 +51,6 @@ class StarRegistryError extends Error {
     }
   }
 }
-
-exports.requestValidation = (address) => {
-  return new Promise((resolve, reject) => {
-    try {
-      let validator = cache.get(address)
-      if (validator === undefined) {
-        validator = new Validator(address)
-        cache.set(address, validator)
-      }
-
-      resolve(validator)
-    } catch (e) {
-      reject(e)
-    }
-  })
-}
-
-exports.validate = (address, signature) => {
-  return new Promise((resolve, reject) => {
-    try {
-      let validator = cache.get(address)
-      if (validator === undefined) {
-        reject(Error('Address not found. Use requestValidation to initiate a validation request.'))
-      }
-
-      const isValid = validator.validate(signature)
-
-      const registration = {
-        'registerStar': isValid,
-        'status': {
-          'address': validator.address,
-          'requestTimeStamp': validator.requestTimeStamp,
-          'message': validator.message,
-          'validationWindow': validator.validationWindow,
-          'messageSignature': isValid ? 'valid' : 'invalid'
-        }
-      }
-
-      resolve(registration)
-    } catch (e) {
-      reject(e)
-    }
-  })
-}
-
-exports.register = async (address, ra, dec, story) => {
-  try {
-    let validator = cache.get(address)
-    if (validator === undefined) {
-      throw Error('Address not found. Use requestValidation to initiate a validation request.')
-    }
-
-    if (validator.validationWindow <= 0) {
-      throw Error(`Validation window has exppired for address ${address}`)
-    }
-
-    const SimpleChain = require('./simple-blockchain')
-    await SimpleChain.init()
-    const starBlock = {
-      address: validator.address,
-      star: {
-        dec: dec,
-        ra: ra,
-        story: Buffer.from(story).toString('hex')
-      }
-    }
-    let block = new SimpleChain.Block(JSON.stringify(starBlock))
-    const chain = new SimpleChain.Blockchain()
-    block = await chain.addBlock(block)
-    await SimpleChain.close()
-    return block
-  } catch (e) {
-    throw new StarRegistryError(e.message)
-  }
-}
-
-exports.searchHash = async (hash) => {
-  try {
-    let block = null
-    const SimpleChain = require('./simple-blockchain')
-    await SimpleChain.init()
-    const chain = new SimpleChain.Blockchain()
-    const height = await chain.getBlockHeight()
-    for (let index = 1; index <= height; index++) {
-      const b = await chain.getBlock(index)
-      if (b.hash === hash) {
-        block = b
-        break
-      }
-    }
-
-    await SimpleChain.close()
-
-    return block
-  } catch (e) {
-    throw new StarRegistryError()
-  }
-}
-
-exports.searchAddress = async (address) => {
-  try {
-    let blocks = []
-    const SimpleChain = require('./simple-blockchain')
-    await SimpleChain.init()
-    const chain = new SimpleChain.Blockchain()
-    const height = await chain.getBlockHeight()
-    for (let index = 1; index <= height; index++) {
-      const block = await chain.getBlock(index)
-      const body = JSON.parse(block.body)
-      if (body.address === address) {
-        blocks.push(block)
-      }
-    }
-
-    await SimpleChain.close()
-
-    return blocks
-  } catch (e) {
-    throw new StarRegistryError()
-  }
-}
-
-exports.searchHeight = async (height) => {
-  try {
-    const SimpleChain = require('./simple-blockchain')
-    await SimpleChain.init()
-    const chain = new SimpleChain.Blockchain()
-    const block = await chain.getBlock(height)
-    await SimpleChain.close()
-
-    return block
-  } catch (e) {
-    throw new StarRegistryError()
-  }
-}
-
-exports.close = () => {
-  cache.close()
-}
-
 let _initialized = false
 
 class StarRegistry {
@@ -255,7 +115,7 @@ class StarRegistry {
     })
   }
 
-  async register (address, ra, dec, story) {
+  async register (address, ra, dec, story, magnitude = NaN, constellation = '') {
     try {
       await this._init()
       let validator = cache.get(address)
@@ -272,7 +132,9 @@ class StarRegistry {
         star: {
           dec: dec,
           ra: ra,
-          story: Buffer.from(story).toString('hex')
+          story: Buffer.from(story).toString('hex'),
+          magnitude: magnitude,
+          constellation: constellation
         }
       }
       let block = new this.simpleChain.Block(JSON.stringify(starBlock))

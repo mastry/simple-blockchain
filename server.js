@@ -1,6 +1,3 @@
-const simpleChain = require('./simple-blockchain')
-const chain = new simpleChain.Blockchain()
-
 const controller = require('./star-registry')
 
 const express = require('express')
@@ -37,7 +34,7 @@ app.post('/message-signature/validate', async (req, res, next) => {
 app.get('/block/:blockHeight', async (req, res, next) => {
   try {
     const blockHeight = parseInt(req.params.blockHeight)
-    const block = await chain.getBlock(blockHeight)
+    const block = await controller.searchHeight(blockHeight)
     res.status(200).json(block)
   } catch (err) {
     if (err.notFound) {
@@ -63,12 +60,18 @@ app.get('/stars/address::address', async (req, res, next) => {
 
 app.post('/block', async (req, res, next) => {
   try {
-    const blockBody = req.body
-    if (!blockBody || blockBody === '') {
+    if (!req.body || req.body === '') {
       res.status(400).json({ error: 'Empty block. Try including some data in the Block body.' })
     } else {
-      let block = new simpleChain.Block(blockBody)
-      block = await chain.addBlock(block)
+      const address = req.body.address
+      const star = req.body.star
+      const block = await controller.register(
+        address,
+        star.ra,
+        star.dec,
+        star.story,
+        star.magnitude || NaN,
+        star.constellation || '')
       res.status(200).json(block)
     }
   } catch (err) {
@@ -76,16 +79,10 @@ app.post('/block', async (req, res, next) => {
   }
 })
 
-simpleChain.init()
-  .then(() => {
-    if (require.main === module) {
-      app.listen(port, async () => {
-        console.log(`Listening on port ${port}`)
-      })
-    }
+if (require.main === module) {
+  app.listen(port, async () => {
+    console.log(`Listening on port ${port}`)
   })
-  .catch(err => {
-    console.log(err)
-  })
+}
 
 module.exports = app // For testing only

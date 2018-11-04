@@ -62,7 +62,8 @@ test('Star Registry Server', async (t) => {
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(200)
         .then(res => {
-          t.equals(res.body.body.address, address, 'registration returns correct address')
+          const body = JSON.parse(res.body.body)
+          t.equals(body.address, address, 'registration returns correct address')
           t.equals(res.body.height > 0, true, 'registration returns height')
           t.equals(res.body.hash.length > 0, true, 'registration returns hash')
           t.equals(res.body.previousBlockHash.length > 0, true, 'registration returns previousBlockHash')
