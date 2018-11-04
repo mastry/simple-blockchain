@@ -29,6 +29,20 @@ class Validator {
   }
 }
 
+class StarRegistryError extends Error {
+  constructor (...params) {
+    // Pass remaining arguments (including vendor specific ones) to parent constructor
+    super(...params)
+
+    this.name = this.constructor.name
+
+    // Maintains proper stack trace for where the error was thrown
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, StarRegistryError)
+    }
+  }
+}
+
 exports.requestValidation = (address) => {
   return new Promise((resolve, reject) => {
     try {
@@ -74,33 +88,34 @@ exports.validate = (address, signature) => {
 }
 
 exports.register = async (address, ra, dec, story) => {
-  let validator = cache.get(address)
-  if (validator === undefined) {
-    throw Error('Address not found. Use requestValidation to initiate a validation request.')
-  }
-
-  if (validator.validationWindow <= 0) {
-    throw Error(`Validation window has exppired for address ${address}`)
-  }
-
-  const SimpleChain = require('./simple-blockchain')
-  await SimpleChain.init()
-
-  const starBlock = {
-    address: validator.address,
-    star: {
-      dec: dec,
-      ra: ra,
-      story: Buffer.from(story).toString('hex')
+  try {
+    let validator = cache.get(address)
+    if (validator === undefined) {
+      throw Error('Address not found. Use requestValidation to initiate a validation request.')
     }
+
+    if (validator.validationWindow <= 0) {
+      throw Error(`Validation window has exppired for address ${address}`)
+    }
+
+    const SimpleChain = require('./simple-blockchain')
+    await SimpleChain.init()
+    const starBlock = {
+      address: validator.address,
+      star: {
+        dec: dec,
+        ra: ra,
+        story: Buffer.from(story).toString('hex')
+      }
+    }
+    let block = new SimpleChain.Block(JSON.stringify(starBlock))
+    const chain = new SimpleChain.Blockchain()
+    block = await chain.addBlock(block)
+    await SimpleChain.close()
+    return block
+  } catch (e) {
+    throw new StarRegistryError(e.message)
   }
-  const chain = new SimpleChain.Blockchain()
-  let block = new SimpleChain.Block(JSON.stringify(starBlock))
-  block = await chain.addBlock(block)
-
-  await SimpleChain.close()
-
-  return { err: null, response: block }
 }
 
 exports.searchHash = async (hash) => {
@@ -120,38 +135,47 @@ exports.searchHash = async (hash) => {
 
     await SimpleChain.close()
 
-    return { err: null, response: block }
+    return block
   } catch (e) {
-    return { err: e, response: null }
+    throw new StarRegistryError()
   }
 }
 
 exports.searchAddress = async (address) => {
-  let blocks = []
-  const SimpleChain = require('./simple-blockchain')
-  await SimpleChain.init()
-  const chain = new SimpleChain.Blockchain()
-  for (let index = 1; index <= await chain.getBlockHeight(); index++) {
-    const block = await chain.getBlock(index)
-    const body = JSON.parse(block.body)
-    if (body.address === address) {
-      blocks.push(block)
+  try {
+    let blocks = []
+    const SimpleChain = require('./simple-blockchain')
+    await SimpleChain.init()
+    const chain = new SimpleChain.Blockchain()
+    const height = await chain.getBlockHeight()
+    for (let index = 1; index <= height; index++) {
+      const block = await chain.getBlock(index)
+      const body = JSON.parse(block.body)
+      if (body.address === address) {
+        blocks.push(block)
+      }
     }
+
+    await SimpleChain.close()
+
+    return blocks
+  } catch (e) {
+    throw new StarRegistryError()
   }
-
-  await SimpleChain.close()
-
-  return { err: null, response: blocks }
 }
 
 exports.searchHeight = async (height) => {
-  const SimpleChain = require('./simple-blockchain')
-  await SimpleChain.init()
-  const chain = new SimpleChain.Blockchain()
-  const block = await chain.getBlock(height)
-  await SimpleChain.close()
+  try {
+    const SimpleChain = require('./simple-blockchain')
+    await SimpleChain.init()
+    const chain = new SimpleChain.Blockchain()
+    const block = await chain.getBlock(height)
+    await SimpleChain.close()
 
-  return { err: null, response: block }
+    return block
+  } catch (e) {
+    throw new StarRegistryError()
+  }
 }
 
 exports.close = () => {

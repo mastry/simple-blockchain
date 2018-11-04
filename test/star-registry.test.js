@@ -40,7 +40,7 @@ test('validate', async (t) => {
     // Register the star
     const story = 'Found star using https://www.google.com/sky/'
     const result = await registry.register(address, '16h 29m 1.0s', '-26° 29\' 24.9', story)
-    const block = JSON.parse(result.response.body)
+    const block = JSON.parse(result.body)
     t.equals(block.address, address, 'Registration address is correct')
     t.equals(block.star.ra, '16h 29m 1.0s', 'Right ascension is correct')
     t.equals(block.star.dec, '-26° 29\' 24.9', 'Declination is correct')
@@ -73,16 +73,16 @@ test('search', async (t) => {
 
     // Search by address
     const addressBlocks = await registry.searchAddress(address)
-    t.equals(addressBlocks.response.length, 1, 'Finds match by address')
-    t.equals(addressBlocks.response[0].hash === result.response.hash, true, 'Finds correct block by address')
+    t.equals(addressBlocks.length, 1, 'Finds match by address')
+    t.equals(addressBlocks[0].hash === result.hash, true, 'Finds correct block by address')
 
     // Search by hash
-    const hashBlock = await registry.searchHash(result.response.hash)
-    t.equals(hashBlock.response.hash === result.response.hash, true, 'Finds correct match by hash')
+    const hashBlock = await registry.searchHash(result.hash)
+    t.equals(hashBlock.hash === result.hash, true, 'Finds correct match by hash')
 
     // Search by height
-    const heightBlock = await registry.searchHeight(result.response.height)
-    t.equals(heightBlock.response.hash === result.response.hash, true, 'Finds correct match by height')
+    const heightBlock = await registry.searchHeight(result.height)
+    t.equals(heightBlock.hash === result.hash, true, 'Finds correct match by height')
   } catch (e) {
     t.fail(e.message, e)
   } finally {
