@@ -55,3 +55,36 @@ test('/requestValidation', t => {
       t.end()
     })
 })
+
+test('/message-signature/validate', async (t) => {
+  // Generate a random key pair / address on testnet
+  const keyPair = bitcoin.ECPair.makeRandom({ network: bitcoin.networks.testnet })
+  const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: bitcoin.networks.testnet })
+
+  // Sign the message and submit for validation
+  const registry = require('../star-registry')
+  const validation = await registry.requestValidation(address)
+  var signature = bitcoinMessage.sign(validation.message, keyPair.privateKey, keyPair.compressed)
+
+  let body = {
+    'address': address,
+    'signature': signature
+  }
+
+  request(app)
+    .post('/message-signature/validate')
+    .send(body)
+    .expect('Content-Type', 'application/json; charset=utf-8')
+    .expect(200)
+    .end((err, res) => {
+      t.equals(err, null, 'POST succeeds')
+      t.equals(res.body.registerStar, true, 'signature validates')
+      t.equals(res.body.status.address, address, 'returns correct address')
+      t.equals(res.body.status.requestTimeStamp > 0, true, 'returns a timestamp')
+      t.equals(res.body.status.message, `${body.address}:${res.body.status.requestTimeStamp}:starRegistry`,
+        'returns a valid message')
+      t.equals(res.body.status.validationWindow > 0, true, 'returns a validation window')
+      t.equals(res.body.status.messageSignature, 'valid', 'signature is flagged as valid')
+      t.end()
+    })
+})
