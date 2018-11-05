@@ -1,8 +1,18 @@
 const test = require('tape').test
 const SimpleChain = require('../simple-blockchain')
 
+const testBody = JSON.stringify({
+  address: 'mrMxKH9Cz9r3WqMSEAJ5xtV9ayjER3mFZ8',
+  star: {
+    dec: "-16° 42' 58.0171''",
+    ra: '6h 45m 8.91728s',
+    story: '74686520646f672073746172',
+    magnitude: null,
+    constellation: '' }
+})
+
 test('Block', (t) => {
-  let block = new SimpleChain.Block('test')
+  let block = new SimpleChain.Block(testBody)
   block.hash = '123'
   block.height = 123
   block.previousBlockHash = '222222222'
@@ -22,7 +32,7 @@ test('Blockchain', async (t) => {
   await SimpleChain.init()
   const chain = new SimpleChain.Blockchain()
 
-  let block1 = new SimpleChain.Block('test')
+  let block1 = new SimpleChain.Block(testBody)
   await chain.addBlock(block1)
   let height = await chain.getBlockHeight()
   t.equals(height > 0, true, 'Block height should be at least 1')
@@ -32,7 +42,7 @@ test('Blockchain', async (t) => {
   t.equals(gBlock.height, 0, 'Genesis block height is zero')
   t.equals(gBlock.body, 'Genesis Block', 'Genesis block body is correct')
 
-  let block2 = new SimpleChain.Block('another test')
+  let block2 = new SimpleChain.Block(testBody)
   await chain.addBlock(block2)
   t.equals(block1.hash, block2.previousBlockHash, 'Hashes are chained properly')
 

@@ -90,6 +90,19 @@ test('Star Registry Server', async (t) => {
               t.equals(res.body.hash, starBlock.hash, 'search by hash')
             })
         })
+        .then(() => {
+          // Search by height
+          request(app)
+            .get(`/block/${starBlock.height}`)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+            .then(res => {
+              t.equals(res.body.hash, starBlock.hash, 'search by height')
+            })
+            .catch(e => {
+              console.log(e.toString())
+            })
+        })
     })
     .catch(e => {
       console.log(e)

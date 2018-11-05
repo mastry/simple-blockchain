@@ -37,7 +37,6 @@ class Validator {
     }
   }
 }
-
 class StarRegistryError extends Error {
   constructor (...params) {
     // Pass remaining arguments (including vendor specific ones) to parent constructor
@@ -51,6 +50,7 @@ class StarRegistryError extends Error {
     }
   }
 }
+
 let _initialized = false
 
 class StarRegistry {
@@ -141,7 +141,7 @@ class StarRegistry {
       block = await this.blockchain.addBlock(block)
       return block
     } catch (e) {
-      throw new StarRegistryError(e.message)
+      throw new StarRegistryError('register')
     }
   }
 
@@ -160,7 +160,7 @@ class StarRegistry {
 
       return block
     } catch (e) {
-      throw new StarRegistryError()
+      throw new StarRegistryError(`searchHash: ${hash}`)
     }
   }
 
@@ -179,7 +179,7 @@ class StarRegistry {
 
       return blocks
     } catch (e) {
-      throw new StarRegistryError()
+      throw new StarRegistryError(`searchAddress: ${address}`)
     }
   }
 
@@ -189,7 +189,7 @@ class StarRegistry {
       const block = await this.blockchain.getBlock(height)
       return block
     } catch (e) {
-      throw new StarRegistryError()
+      throw new StarRegistryError(`searchHeight: ${height}`)
     }
   }
 
