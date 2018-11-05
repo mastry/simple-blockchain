@@ -58,6 +58,19 @@ app.get('/stars/address::address', async (req, res, next) => {
   }
 })
 
+app.get('/stars/hash::hash', async (req, res, next) => {
+  try {
+    const blocks = await controller.searchHash(req.params.hash)
+    res.status(200).json(blocks)
+  } catch (err) {
+    if (err.notFound) {
+      res.status(404).json('Block not found')
+    } else {
+      res.status(500).json({ error: err.toString() })
+    }
+  }
+})
+
 app.post('/block', async (req, res, next) => {
   try {
     if (!req.body || req.body === '') {

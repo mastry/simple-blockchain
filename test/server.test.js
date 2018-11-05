@@ -80,6 +80,16 @@ test('Star Registry Server', async (t) => {
               t.equals(res.body[0].hash, starBlock.hash, 'search by address')
             })
         })
+        .then(() => {
+          // Search by hash
+          request(app)
+            .get(`/stars/hash:${starBlock.hash}`)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+            .then(res => {
+              t.equals(res.body.hash, starBlock.hash, 'search by hash')
+            })
+        })
     })
     .catch(e => {
       console.log(e)
