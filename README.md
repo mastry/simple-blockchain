@@ -1,6 +1,5 @@
 # Simple Blockchain
-This is a very simple blockchain implementation that I wrote for Udacity's Blockchain Developer nanodegree program.
-
+This is a very simple blockchain implementation that I wrote for Udacity's Blockchain Developer nanodegree program. It implements a star registration service on top of the blockchain.
 
 ### Prerequisites
 
@@ -18,25 +17,100 @@ Clone the source code to your local machine:
 git clone https://github.com/mastry/simple-blockchain.git
 ```
 
-Install the project dependencies:
-```bash
-cd simple-blockchain
-npm install
-```
-
 Create some test data and run the tests:
 ```bash
 node test/simple-blockchain.test.js
+node test/star-registry.test.js
+node test/server.test.js
 ```
 
-To view blocks in your browser, run the command below and then open your browser to [http://localhost:8000/get/0](http://localhost:8000/block/0). Change the number at the end of that URL to view a different block.
+To view blocks in your browser, run the command below and then open your browser to [http://localhost:8000/get/0](http://localhost:8000/block/0). That should show the genesis block. Change the number at the end of that URL to view a different block (assuming you've added any).
 ```bash
 node server.js
 ```
 
 ## Using the REST API
 
-The REST API server (see Getting Started above) exposes the two endpoints described below.
+The REST API server (see Getting Started above) exposes the endpoints described below. To add a new star to the registry you have to follow this sequence:
+
+* /requestValidation
+* /message-signature/validate
+* /block 
+
+To retrieve an existing star registration, use one of the following search endpoints:
+
+* /stars/address:{address} _(search by address of submitter)_
+* /stars/hash:{hash} _(search by block hash)_
+* /block/{height} _(search by block height)_
+
+See the details for each endpoint below.
+
+### /requestValidation
+This endpoint is used to begin the registration process. It returns a message that must be signed with the specified bitcoin address (see /message-signature/validate below).
+
+```bash
+curl -X "POST" "http://localhost:8000/requestValidation" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "address": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ"
+}'
+```
+
+The response also includes a "ValidationWindow" that contains the number of seconds left in the validation window. Once the validation window expires (in 300 seconds), registration must be restarted with /requestValidation. Here's a sample response:
+
+```bash
+{
+  "address": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ",
+  "requestTimeStamp": "1532296090",
+  "message": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ:1532296090:starRegistry",
+  "validationWindow": 300
+}
+```
+
+### /message-signature/validate
+Use this endpoint to validate the submitter's identity. This is accomplished by signing the message received in /requestValidation with the same address used in that call.
+
+```bash
+curl -X "POST" "http://localhost:8000/message-signature/validate" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "address": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ",
+  "signature": "H6ZrGrF0Y4rMGBMRT2+hHWGbThTIyhBS0dNKQRov9Yg6GgXcHxtO9GJN4nwD2yNXpnXHTWU9i+qdw5vpsooryLU="
+}'
+```
+A successful response will look something like this:
+
+```bash
+{
+  "registerStar": true,
+  "status": {
+    "address": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ",
+    "requestTimeStamp": "1532296090",
+    "message": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ:1532296090:starRegistry",
+    "validationWindow": 193,
+    "messageSignature": "valid"
+  }
+}
+```
+### /block
+This endpoint adds a new star registration to the blockchain. It's an HTTP POST method that expects the block body (star details - see example below) to be in the body of the POST. You can call it with curl like this:
+
+```bash
+curl -X "POST" "http://localhost:8000/block" \
+     -H 'Content-Type: application/json; charset=utf-8' \
+     -d $'{
+  "address": "142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ",
+  "star": {
+    "dec": "-26° 29'\'' 24.9",
+    "ra": "16h 29m 1.0s",
+    "story": "Found star using https://www.google.com/sky/",
+    "magnitude": 1,
+    "constellation": "Aquarius"
+  }
+}'
+```
+
+The "dec" and "ra" values are the declination and right ascension of the star. The magnitude and constallation values are optional. The new Block is returned with its blockchain hash, height, etc...
 
 ### /block/{height}
 This endpoint gets the block with height {height}. For example, to get the block with height 42 with curl:
@@ -44,23 +118,28 @@ This endpoint gets the block with height {height}. For example, to get the block
 ```bash
 curl http://localhost:8000/block/42
 ```
+The genesis block is block zero (height 0). If there is no block with the specified height, the endpoint returns 404.
 
-If there is no block with the specified height, the endpoint returns 404.
-
-### /block
-This endpoint adds a new block to the blockchain. It's an HTTP POST method that expects the block body to be in the body of the POST. You can call it with curl like this:
+### /stars/address:{address}
+Use this endpoint to search for all the stars submitted by a particular bitcoin address.
 
 ```bash
-curl -X "POST" "http://localhost:8000/block" -H 'Content-Type: application/json' -d $'{"body": "block body contents"}'
+curl "http://localhost:8000/stars/address:142BDCeSGbXjWKaAnYXbMpZ6sbrSAo3DpZ"
 ```
-The new Block is returned.
 
+### /stars/hash:{hash}
+Use this endpoint to search for a star by its blockchain hash value.
+
+```bash
+curl "http://localhost:8000/stars/hash:a59e9e399bc17c2db32a7a87379a8012f2c8e08dd661d7c0a6a4845d4f3ffb9f"
+```
 
 ## Running the tests
 
-Automated tests are located in the tests folder. Ther you will find a test script for simple-blockchain and one for server. 
+Automated tests are located in the tests folder. Ther you will find a test script for simple-blockchain, star-registry, and server. 
 
 * simple-blockchain.test.js
+* star-registry.test.js
 * server.test.js
 
 You can run each of these with node directly. For example...
@@ -98,6 +177,7 @@ ok 13 Blockchain validates all blocks
 You can also run the configured NPM scripts that use Tape for nicely formatted ouput.
 
 * test-blockchain
+* test-star-registry
 * test-server
 
 ```bash
