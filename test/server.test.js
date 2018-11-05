@@ -70,16 +70,16 @@ test('Star Registry Server', async (t) => {
           t.equals(res.body.time > 0, true, 'registration returns time')
           starBlock = res.body
         })
-    })
-    .then(() => {
-      // TODO: Search by address
-      /* request(app)
-        .get(`/stars/address:${address}`)
-        .expect('Content-Type', 'application/json; charset=utf-8')
-        .expect(200)
-        .then(res => {
-          t.equals(res.body.hash, starBlock.hash, 'correct star returned')
-        }) */
+        .then(() => {
+          // Search by address
+          request(app)
+            .get(`/stars/address:${address}`)
+            .expect('Content-Type', 'application/json; charset=utf-8')
+            .expect(200)
+            .then(res => {
+              t.equals(res.body[0].hash, starBlock.hash, 'search by address')
+            })
+        })
     })
     .catch(e => {
       console.log(e)

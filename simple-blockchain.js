@@ -294,10 +294,12 @@ class ValidationError extends Error {
 
 async function init () {
   try {
-    db = await level('./db')
+    if (db === null) {
+      db = await level('./db')
 
-    // this will throw err.notFound if there is no genesis block
-    await db.get(0)
+      // this will throw err.notFound if there is no genesis block
+      await db.get(0)
+    }
   } catch (err) {
     if (err.notFound) {
     // Genesis block not found so add one
