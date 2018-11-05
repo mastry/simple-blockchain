@@ -139,6 +139,7 @@ class StarRegistry {
       }
       let block = new this.simpleChain.Block(JSON.stringify(starBlock))
       block = await this.blockchain.addBlock(block)
+      cache.del(address) // Ensure only one star can be registered at a time
       return block
     } catch (e) {
       throw new StarRegistryError('register')
