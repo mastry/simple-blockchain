@@ -56,8 +56,8 @@ let _initialized = false
 class StarRegistry {
   constructor () {
     if (!StarRegistry.instance) {
-      this.simpleChain = require('./simple-blockchain')
-      this.blockchain = new this.simpleChain.Blockchain()
+      this.simple = require('./simpleBlockchain')
+      this.blockchain = this.simple.Blockchain
       StarRegistry.instance = this
     }
 
@@ -66,7 +66,7 @@ class StarRegistry {
 
   async _init () {
     if (!_initialized) {
-      await this.simpleChain.init()
+      await this.blockchain.init()
       _initialized = true
     }
   }
@@ -137,12 +137,12 @@ class StarRegistry {
           constellation: constellation
         }
       }
-      let block = new this.simpleChain.Block(JSON.stringify(starBlock))
-      block = await this.blockchain.addBlock(block)
+      const data = JSON.stringify(starBlock)
+      const block = await this.blockchain.addBlock(data)
       cache.del(address) // Ensure only one star can be registered at a time
       return block
     } catch (e) {
-      throw new StarRegistryError('register')
+      throw new StarRegistryError(`register: ${e.toString()}`)
     }
   }
 
@@ -180,7 +180,7 @@ class StarRegistry {
 
       return blocks
     } catch (e) {
-      throw new StarRegistryError(`searchAddress: ${address}`)
+      throw new StarRegistryError(`searchAddress ${address}: ${e.toString()}`)
     }
   }
 
@@ -194,10 +194,10 @@ class StarRegistry {
     }
   }
 
-  close () {
+  async close () {
     cache.close()
     if (_initialized) {
-      this.simpleChain.close()
+      await this.blockchain.close()
     }
   }
 }

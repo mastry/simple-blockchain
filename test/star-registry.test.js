@@ -84,7 +84,7 @@ test('search', async (t) => {
   } catch (e) {
     t.fail(e.message, e)
   } finally {
-    registry.close()
+    await registry.close()
     t.end()
   }
 })
