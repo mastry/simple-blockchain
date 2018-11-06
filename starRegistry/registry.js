@@ -1,42 +1,9 @@
+const Memcache = require('./memcache')
+
 // Create an in-memory cache that automatically deletes items after 5 minutes (300 seconds)
 const NodeCache = require('node-cache')
-const CACHE_TIMEOUT_SECONDS = 300
-const cache = new NodeCache({ stdTTL: CACHE_TIMEOUT_SECONDS })
+const cache = new NodeCache({ stdTTL: Memcache.cacheTimeout })
 
-var bitcoin = require('bitcoinjs-lib')
-var bitcoinMessage = require('bitcoinjs-message')
-
-class Validator {
-  constructor (address) {
-    this.requestTimeStamp = Date.now()
-    this.address = address
-    this.message = `${address}:${this.requestTimeStamp}:starRegistry`
-  }
-
-  get validationWindow () {
-    const now = Date.now()
-    const elapsed = Math.floor(now - this.requestTimeStamp) / 1000
-    const remaining = CACHE_TIMEOUT_SECONDS - elapsed
-    return remaining
-  }
-
-  validate (signature) {
-    if (this.validationWindow <= 0) {
-      return false
-    }
-
-    return bitcoinMessage.verify(this.message, this.address, signature)
-  }
-
-  toJSON () {
-    return {
-      'address': this.address,
-      'requestTimeStamp': this.requestTimeStamp,
-      'message': this.message,
-      'validationWindow': this.validationWindow
-    }
-  }
-}
 class StarRegistryError extends Error {
   constructor (...params) {
     // Pass remaining arguments (including vendor specific ones) to parent constructor
@@ -56,7 +23,7 @@ let _initialized = false
 class StarRegistry {
   constructor () {
     if (!StarRegistry.instance) {
-      this.simple = require('./simpleBlockchain')
+      this.simple = require('../simpleBlockchain')
       this.blockchain = this.simple.Blockchain
       StarRegistry.instance = this
     }
@@ -76,7 +43,7 @@ class StarRegistry {
       try {
         let validator = cache.get(address)
         if (validator === undefined) {
-          validator = new Validator(address)
+          validator = new Memcache(address)
           cache.set(address, validator)
         }
 

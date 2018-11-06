@@ -1,4 +1,4 @@
-const controller = require('./star-registry')
+const controller = require('./starRegistry')
 
 const express = require('express')
 const app = express()

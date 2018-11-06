@@ -1,5 +1,5 @@
 const test = require('tape').test
-const registry = require('../star-registry')
+const registry = require('../starRegistry')
 
 function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
