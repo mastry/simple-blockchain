@@ -1,6 +1,11 @@
 var bitcoin = require('bitcoinjs-lib')
 var bitcoinMessage = require('bitcoinjs-message')
 
+// Create an in-memory cache that automatically deletes items after 5 minutes (300 seconds)
+const CACHE_TIMEOUT = 300
+const NodeCache = require('node-cache')
+const cache = new NodeCache({ stdTTL: CACHE_TIMEOUT })
+
 class Memcache {
   constructor (address) {
     this.requestTimeStamp = Date.now()
@@ -8,12 +13,10 @@ class Memcache {
     this.message = `${address}:${this.requestTimeStamp}:starRegistry`
   }
 
-  cacheTimeout () { return 300 }
-
   get validationWindow () {
     const now = Date.now()
     const elapsed = Math.floor(now - this.requestTimeStamp) / 1000
-    const remaining = Memcache.cacheTimeout - elapsed
+    const remaining = CACHE_TIMEOUT - elapsed
     return remaining
   }
 
@@ -35,6 +38,9 @@ class Memcache {
   }
 }
 
-Memcache.cacheTimeout = 300
+Memcache.get = (address) => { return cache.get(address) }
+Memcache.set = (address, memcache) => { cache.set(address, memcache) }
+Memcache.del = (address) => { cache.del(address) }
+Memcache.close = () => { cache.close() }
 
 module.exports = Memcache

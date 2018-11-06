@@ -1,9 +1,5 @@
 const Memcache = require('./memcache')
 
-// Create an in-memory cache that automatically deletes items after 5 minutes (300 seconds)
-const NodeCache = require('node-cache')
-const cache = new NodeCache({ stdTTL: Memcache.cacheTimeout })
-
 class StarRegistryError extends Error {
   constructor (...params) {
     // Pass remaining arguments (including vendor specific ones) to parent constructor
@@ -41,13 +37,13 @@ class StarRegistry {
   requestValidation (address) {
     return new Promise((resolve, reject) => {
       try {
-        let validator = cache.get(address)
-        if (validator === undefined) {
-          validator = new Memcache(address)
-          cache.set(address, validator)
+        let memcache = Memcache.get(address)
+        if (memcache === undefined) {
+          memcache = new Memcache(address)
+          Memcache.set(address, memcache)
         }
 
-        resolve(validator)
+        resolve(memcache)
       } catch (e) {
         reject(e)
       }
@@ -57,20 +53,20 @@ class StarRegistry {
   validate (address, signature) {
     return new Promise((resolve, reject) => {
       try {
-        let validator = cache.get(address)
-        if (validator === undefined) {
+        let memcache = Memcache.get(address)
+        if (memcache === undefined) {
           reject(Error('Address not found. Use requestValidation to initiate a validation request.'))
         }
 
-        const isValid = validator.validate(signature)
+        const isValid = memcache.validate(signature)
 
         const registration = {
           'registerStar': isValid,
           'status': {
-            'address': validator.address,
-            'requestTimeStamp': validator.requestTimeStamp,
-            'message': validator.message,
-            'validationWindow': validator.validationWindow,
+            'address': memcache.address,
+            'requestTimeStamp': memcache.requestTimeStamp,
+            'message': memcache.message,
+            'validationWindow': memcache.validationWindow,
             'messageSignature': isValid ? 'valid' : 'invalid'
           }
         }
@@ -85,17 +81,17 @@ class StarRegistry {
   async register (address, ra, dec, story, magnitude = NaN, constellation = '') {
     try {
       await this._init()
-      let validator = cache.get(address)
-      if (validator === undefined) {
+      let memcache = Memcache.get(address)
+      if (memcache === undefined) {
         throw Error('Address not found. Use requestValidation to initiate a validation request.')
       }
 
-      if (validator.validationWindow <= 0) {
+      if (memcache.validationWindow <= 0) {
         throw Error(`Validation window has exppired for address ${address}`)
       }
 
       const starBlock = {
-        address: validator.address,
+        address: memcache.address,
         star: {
           dec: dec,
           ra: ra,
@@ -106,7 +102,7 @@ class StarRegistry {
       }
       const data = JSON.stringify(starBlock)
       const block = await this.blockchain.addBlock(data)
-      cache.del(address) // Ensure only one star can be registered at a time
+      Memcache.del(address) // Ensure only one star can be registered at a time
       return block
     } catch (e) {
       throw new StarRegistryError(`register: ${e.toString()}`)
@@ -162,7 +158,7 @@ class StarRegistry {
   }
 
   async close () {
-    cache.close()
+    Memcache.close()
     if (_initialized) {
       await this.blockchain.close()
     }
