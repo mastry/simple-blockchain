@@ -1,18 +1,5 @@
 const Memcache = require('./memcache')
-
-class StarRegistryError extends Error {
-  constructor (...params) {
-    // Pass remaining arguments (including vendor specific ones) to parent constructor
-    super(...params)
-
-    this.name = this.constructor.name
-
-    // Maintains proper stack trace for where the error was thrown
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, StarRegistryError)
-    }
-  }
-}
+const StarRegistryError = require('./starRegistryError')
 
 let _initialized = false
 
