@@ -7,8 +7,22 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Test Server",
+            "program": "${workspaceFolder}/test/server.test.js"
+        },
+
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Test Registry",
             "program": "${workspaceFolder}/test/star-registry.test.js"
+        },
+
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Test Blockchain",
+            "program": "${workspaceFolder}/test/simple-blockchain.test.js"
         }
     ]
 }
