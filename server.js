@@ -1,8 +1,9 @@
 const controller = require('./starRegistry')
+const config = require('./config')
 
 const express = require('express')
 const app = express()
-const port = 8000
+const port = config.app.port
 
 // Use body-parser for JSON parsing
 const bodyParser = require('body-parser')

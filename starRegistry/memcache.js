@@ -1,10 +1,10 @@
 var bitcoin = require('bitcoinjs-lib')
 var bitcoinMessage = require('bitcoinjs-message')
+var config = require('../config')
 
 // Create an in-memory cache that automatically deletes items after 5 minutes (300 seconds)
-const CACHE_TIMEOUT = 300
 const NodeCache = require('node-cache')
-const cache = new NodeCache({ stdTTL: CACHE_TIMEOUT })
+const cache = new NodeCache({ stdTTL: config.registry.cacheTimeout })
 
 class Memcache {
   constructor (address) {
@@ -16,7 +16,7 @@ class Memcache {
   get validationWindow () {
     const now = Date.now()
     const elapsed = Math.floor(now - this.requestTimeStamp) / 1000
-    const remaining = CACHE_TIMEOUT - elapsed
+    const remaining = config.registry.cacheTimeout - elapsed
     return remaining
   }
 

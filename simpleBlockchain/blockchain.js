@@ -1,6 +1,8 @@
+const config = require('../config')
+const Block = require('./block')
+
 const SHA256 = require('crypto-js/sha256')
 const level = require('level')
-const Block = require('./block')
 const ValidationError = require('./validationError')
 const ValidationResult = require('./validationResult')
 
@@ -140,7 +142,7 @@ module.exports.validateChain = async () => {
 module.exports.init = async () => {
   try {
     if (db == null) {
-      db = await level('./db')
+      db = await level(config.blockchain.dbFolder)
 
       // this will throw err.notFound if there is no genesis block
       await db.get(0)
