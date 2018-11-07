@@ -10,12 +10,6 @@ const bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-// Error handling
-app.use((err, request, response, next) => {
-  console.log(err)
-  response.status(500).send(err.message)
-})
-
 app.post('/requestValidation', (req, res, next) => {
   controller.requestValidation(req.body.address)
     .then(response => {
@@ -91,6 +85,12 @@ app.post('/block', async (req, res, next) => {
   } catch (err) {
     res.status(500).json({ error: err.toString() })
   }
+})
+
+// Error handling
+app.use((err, request, response, next) => {
+  console.log(err)
+  response.status(500).send(err.message)
 })
 
 if (require.main === module) {
