@@ -111,7 +111,9 @@ class StarRegistry {
 
       return block
     } catch (e) {
-      throw new StarRegistryError(`searchHash: ${hash}`)
+      let error = new StarRegistryError(`searchHash: ${hash}`)
+      error.notFound = e.notFound
+      throw error
     }
   }
 
@@ -130,7 +132,9 @@ class StarRegistry {
 
       return blocks
     } catch (e) {
-      throw new StarRegistryError(`searchAddress ${address}: ${e.toString()}`)
+      let error = new StarRegistryError(`searchAddress ${address}: ${e.toString()}`)
+      error.notFound = e.notFound
+      throw error
     }
   }
 
@@ -140,7 +144,9 @@ class StarRegistry {
       const block = await this.blockchain.getBlock(height)
       return block
     } catch (e) {
-      throw new StarRegistryError(`searchHeight: ${height}`)
+      let error = new StarRegistryError(`searchHeight: ${height}`)
+      error.notFound = e.notFound
+      throw error
     }
   }
 
