@@ -32,11 +32,7 @@ app.get('/block/:blockHeight', async (req, res, next) => {
     const block = await controller.searchHeight(blockHeight)
     res.status(200).json(block)
   } catch (err) {
-    if (err.notFound) {
-      res.status(404).json('Block not found')
-    } else {
-      res.status(500).json({ error: err.toString() })
-    }
+    next(err)
   }
 })
 
@@ -45,11 +41,7 @@ app.get('/stars/address::address', async (req, res, next) => {
     const blocks = await controller.searchAddress(req.params.address)
     res.status(200).json(blocks)
   } catch (err) {
-    if (err.notFound) {
-      res.status(404).json('Block not found')
-    } else {
-      res.status(500).json({ error: err.toString() })
-    }
+    next(err)
   }
 })
 
@@ -58,11 +50,7 @@ app.get('/stars/hash::hash', async (req, res, next) => {
     const blocks = await controller.searchHash(req.params.hash)
     res.status(200).json(blocks)
   } catch (err) {
-    if (err.notFound) {
-      res.status(404).json('Block not found')
-    } else {
-      res.status(500).json({ error: err.toString() })
-    }
+    next(err)
   }
 })
 
@@ -83,14 +71,18 @@ app.post('/block', async (req, res, next) => {
       res.status(200).json(block)
     }
   } catch (err) {
-    res.status(500).json({ error: err.toString() })
+    next(err)
   }
 })
 
 // Error handling
 app.use((err, request, response, next) => {
   console.log(err)
-  response.status(500).send(err.message)
+  if (err.notFound) {
+    response.status(404).json('The requested block was not found.')
+  } else {
+    response.status(500).json({ error: err.message })
+  }
 })
 
 if (require.main === module) {
